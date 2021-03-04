@@ -7,7 +7,16 @@
     </v-toolbar>
     <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions" @vdropzone-thumbnail="vfileAdded"></vue-dropzone>
     
-    <v-row no-gutters>
+    <v-row v-if="uploading" class="" no-gutters>
+      <v-col class="text-center">
+        <v-progress-circular
+          indeterminate
+          color="green"
+          :size="70"
+        ></v-progress-circular>
+      </v-col>
+    </v-row>
+    <v-row v-else no-gutters>
       <v-col>
         <v-btn v-if="files.length > 0" block color="red lighten-3" @click="removeAll">Clear</v-btn>
       </v-col>
@@ -53,6 +62,7 @@
           autoProcessQueue: false,
           acceptedFiles: "image/png",
         },
+        uploading: false,
         images: [],
         files: [],
         form: new Form({
@@ -85,7 +95,8 @@
         this.files.push(file);
       },
       upload(){
-        this.$Progress.start()
+        this.$Progress.start();
+        this.uploading = true;
         this.form.post('api/upload')
           .then((response) => {
             Swal.fire({
@@ -95,11 +106,13 @@
               allowOutsideClick: false
             });
             this.$Progress.finish();
+            this.uploading = false;
             window.store.commit("addImages", response.data.images);
             Fire.$emit('AfterUpdateImagesLoad'); //custom events
             for (let index = 0; index < this.files.length; index++) {
               this.$refs.myVueDropzone.removeFile(this.files[index]);
             }
+            this.files = [];
           })
           .catch((error) => {
             if (error.response) {
