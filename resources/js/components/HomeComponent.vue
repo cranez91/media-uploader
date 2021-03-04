@@ -1,19 +1,35 @@
 <template>
   <div>
-    <v-toolbar color="purple lighten-1" class="d-none d-md-flex d-lg-flex d-xl-none" dense>
+    <v-toolbar color="deep-purple lighten-2" class="white--text" dense>
       <v-toolbar-title>
         Media Uploader
       </v-toolbar-title>
     </v-toolbar>
     <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions" @vdropzone-thumbnail="vfileAdded"></vue-dropzone>
-    <v-btn block color="primary" @click="upload">Upload</v-btn>
+    
+    <v-row no-gutters>
+      <v-col>
+        <v-btn v-if="files.length > 0" block color="red lighten-3" @click="removeAll">Clear</v-btn>
+      </v-col>
+      <v-col>
+        <v-btn v-if="files.length > 0" block color="green lighten-2" @click="upload">Upload</v-btn>
+      </v-col>
+    </v-row>
+
+    <v-toolbar v-if="images.length > 0" class="white--text" color="deep-purple lighten-2" dense>
+      <v-toolbar-title>
+        Uploaded Images
+      </v-toolbar-title>
+    </v-toolbar>
 
     <v-container fluid>
       <v-row justify="space-around">
         <v-col cols="10">
-          <div v-for="(image, index) in images" :key="index">
-            <v-img :src="image" aspect-ratio="1.7" width="100"></v-img>
-          </div>
+          <v-row>
+            <v-col lg="2" md="4" sm="6" xs="12" v-for="(image, index) in images" :key="index">
+              <v-img :src="image" aspect-ratio="1" width="100"></v-img>
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
     </v-container>
@@ -45,7 +61,26 @@
       }
     },
     methods: {
+      loadImages(){
+        this.images = window.store.getters.images;
+      },
+      removeAll(){
+        for (let index = 0; index < this.files.length; index++) {
+          this.$refs.myVueDropzone.removeFile(this.files[index]);
+        }
+        this.files = [];
+      },
       vfileAdded(file) {
+        if (file.type != "image/png") {
+          this.$refs.myVueDropzone.removeFile(file);
+          Swal.fire({
+            icon: 'error',
+            title: 'Sorry',
+            text: 'Only PNG files are allowed',
+            allowOutsideClick: false
+          });
+          return;
+        }
         this.form.images.push(file.dataURL);
         this.files.push(file);
       },
@@ -53,32 +88,46 @@
         this.$Progress.start()
         this.form.post('api/upload')
           .then((response) => {
-            Fire.$emit('AfterUpdateImagesLoad'); //custom events
-            Toast.fire({
+            Swal.fire({
               icon: 'success',
-              title: 'Images uploaded successfully'
+              title: 'Awesome!',
+              text: 'Image(s) uploaded successfully',
+              allowOutsideClick: false
             });
             this.$Progress.finish();
-            this.images = response.data.images;
+            window.store.commit("addImages", response.data.images);
+            Fire.$emit('AfterUpdateImagesLoad'); //custom events
             for (let index = 0; index < this.files.length; index++) {
               this.$refs.myVueDropzone.removeFile(this.files[index]);
             }
           })
-          .catch(() => {
-            Toast.fire({
-              icon: 'Error',
-              title: 'Something went wrong'
-            });
+          .catch((error) => {
+            if (error.response) {
+              var errors = error.response.data.errors;
+              var msg = "";
+              for(error in errors){
+                msg += errors[error][0] + "\n";
+              }
+              var msg = 
+                Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: msg
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong, please try again'
+              });
+            }
           });
-      },
-      loadUsers() {
-        axios.get("api/user").then( data => (this.users = data.data));
-      },
+      }
     },
     created() { 
-      //this.loadImages();
+      this.loadImages();
       Fire.$on('AfterUpdateImagesLoad',()=>{ //custom events fire on
-        //this.loadImages();
+        this.loadImages();
       });
     }
   }

@@ -29,11 +29,16 @@ window.store = new Vuex.Store({
     images: []
   },
   mutations: {
-    setImages(state, value){
-      state.images = value;
-    },
-    getImages(state, value){
+    addImages(state, images){
+      for (let index = 0; index < images.length; index++) {
+        state.images.unshift(images[index]);
+      }
       return state.images;
+    }
+  },
+  getters: {
+    images: state => {
+      return state.images
     }
   },
   plugins: [createPersistedState()]
@@ -67,14 +72,14 @@ import { routes } from './routes';
 //Register Routes
 const router = new VueRouter({
     routes, 
-    mode: 'hash',
+    mode: 'history',
 
 })
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
 const app = new Vue({
-    vuetify: new Vuetify(),
-    el: '#app',
-    router
+  vuetify: new Vuetify(),
+  el: '#app',
+  router
 });

@@ -12,14 +12,16 @@
 
 <body class="hold-transition sidebar-mini">
   <div class="wrapper" id="app">
-    <div class="content-wrapper">
-      <div class="content">
-        <div class="container-fluid">
-          <router-view></router-view>
-          <vue-progress-bar></vue-progress-bar>
+    <v-app>
+      <div class="content-wrapper">
+        <div class="content">
+          <div class="container-fluid">
+            <router-view></router-view>
+            <vue-progress-bar></vue-progress-bar>
+          </div>
         </div>
       </div>
-    </div>
+    </v-app>
   </div>
   <script src="{{ mix('js/app.js') }}"></script>
 </body>
