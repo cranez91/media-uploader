@@ -38,6 +38,29 @@ class Requester
 
     /**
      *
+     * Requests a POST URL using a GuzzleHttp client
+     *
+     * @param string $url The API URL to be requested
+     * @return object|null $responseData
+     *
+     */
+    public function post(string $url, array $data){
+        $responseData = null;
+        try {
+            $response = $this->client->request("POST", $url, [
+                'form_params' => [
+                    $data["field"] => $data["value"]
+                ]
+            ]);
+            $responseData = json_decode($response->getBody()->getContents());
+        } catch (RequestException $e) {
+            throw $e;
+        }
+        return $responseData;
+      }
+
+    /**
+     *
      * Async Request to GET URL using a GuzzleHttp client
      *
      * @param string $url The API URL to be requested

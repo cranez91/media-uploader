@@ -5,9 +5,20 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreImagesRequest;
+use App\Modules\Requester as GuzzleRequester;
 
 class ImagesController extends Controller
 {
+    /**
+     * Used to request data using Guzzle
+     * @var GuzzleRequester $requester 
+     */
+    private $requester;
+
+    function __construct()
+    {
+        $this->requester = new GuzzleRequester;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -26,9 +37,13 @@ class ImagesController extends Controller
      */
     public function store(StoreImagesRequest $request)
     {
-        foreach ($request->images as $image) {
-            # code...
+        $uploaded = [];
+        foreach ($request->images as $b64file) {
+            $response = $this->requester->post(config("external.image_upload"), ["field" => "imageData", "value" => preg_split("/[,]/",  $b64file)[1]]);
+            array_push($uploaded, $response->url);
         }
+        if (sizeof($uploaded) > 0) return response()->json(["images" => $uploaded], 201);
+        return response()->json(null, 500);
     }
 
     /**

@@ -15,6 +15,35 @@ require('./customEvents');
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
+//Import Vuetify
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
+
+Vue.use(Vuetify)
+
+const Vuex = require('vuex');
+import  createPersistedState  from  'vuex-persistedstate'
+
+window.store = new Vuex.Store({
+  state: {
+    images: []
+  },
+  mutations: {
+    addImages(state, images){
+      for (let index = 0; index < images.length; index++) {
+        state.images.unshift(images[index]);
+      }
+      return state.images;
+    }
+  },
+  getters: {
+    images: state => {
+      return state.images
+    }
+  },
+  plugins: [createPersistedState()]
+});
+
 //Import Sweetalert2
 import Swal from 'sweetalert2'
 window.Swal = Swal
@@ -43,13 +72,14 @@ import { routes } from './routes';
 //Register Routes
 const router = new VueRouter({
     routes, 
-    mode: 'hash',
+    mode: 'history',
 
 })
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
 const app = new Vue({
-    el: '#app',
-    router
+  vuetify: new Vuetify(),
+  el: '#app',
+  router
 });
