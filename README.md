@@ -9,7 +9,13 @@ First of all, you need to clone this project to you local machine. Once you have
 Make sure you have installed **Composer** and **Node.js**, so you need to run:
 
 * composer install
+* npm install
 * php artisan key:generate
+
+In a terminal run:
 * php artisan serve
 
-Finally, you should be able to see the project running at **http://localhost:8000/**
+In another terminal run:
+* npm run watch
+
+Finally, you should be able to see the project running 
