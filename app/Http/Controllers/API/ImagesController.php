@@ -40,6 +40,7 @@ class ImagesController extends Controller
         $uploaded = [];
         foreach ($request->images as $b64file) {
             $response = $this->requester->post(config("external.image_upload"), ["field" => "imageData", "value" => preg_split("/[,]/",  $b64file)[1]]);
+            if ($response->status != "success") return response()->json(null, 500);
             array_push($uploaded, $response->url);
         }
         if (sizeof($uploaded) > 0) return response()->json(["images" => $uploaded], 201);
